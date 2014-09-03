@@ -298,6 +298,10 @@ message Command {
 		// encrypted key/value store.(See security document).
 		optional Algorithm algorithm = 6;
 
+        // To be used when algorithm is set to OTHER to specify a particular propietary algorithm. 
+        // The device doesn't know this algorithms, it will verify its internal state but it wont verify the end to end data integrity. 
+        optional string otherAlgorithm = 10;
+
 		// for read operations, this will get all the information about the value except for the
 		// value itself. This is valuable for getting the integrity field or the version without also
 		// having to get the data. If this field is not present, it is as if it is false. For
@@ -676,13 +680,13 @@ message Command {
 	//algorithm
 	enum Algorithm {
 		INVALID_ALGORITHM = -1; // Must come first, so default is invalid
-		SHA1 = 1; // see NIST
+        SHA1 = 1; // see NIST
 		SHA2 = 2; // see NIST
 		SHA3 = 3; // see NIST. The length of the tag determined the length of the hash
 		CRC32 = 4; // the CRC32 is the standard Ethernet CRC32. See IEEE
 		CRC64 = 5; // The CRC is ...
 		// 7-99 are reserved.
-		// 100-inf are private algorithms.
+		OTHER = 100; // customer propietary, the device wont check it. Specified on otherAlgorithm field. 
 	}
 
 	//operation code
