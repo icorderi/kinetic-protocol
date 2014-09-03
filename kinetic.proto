@@ -426,7 +426,7 @@ message Command {
 		optional Capacity capacity = 4;
 		optional Configuration configuration = 5;
 		repeated Statistics statistics = 6;
-		optional bytes messages = 7;
+		optional string messages = 7;
 		optional Limits limits = 8;
 		optional Device device = 9;
 		message Utilization {
