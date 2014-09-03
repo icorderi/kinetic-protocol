@@ -472,10 +472,10 @@ message Command {
 			optional string model = 6;
 
 			// Device Serial number (SN)
-			optional bytes serialNumber = 7;
+			optional string serialNumber = 7;
 
 			// Device world wide name (WWN)
-			optional bytes worldWideName = 14;
+			optional string worldWideName = 14;
 
 			// This is the vendor specific version of the software on the device in dot notation
 			// if this is not set or ends with "x" this is test code.
@@ -544,7 +544,7 @@ message Command {
 		//
 		// There can be only one Device in the list of logs that can be retrieved.!
 		message Device {
-			optional bytes name = 1;
+			optional string name = 1;
 		}
 
 	}
