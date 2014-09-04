@@ -37,73 +37,72 @@ The message structure for each operation will be described in depth in the follo
 The Kinetic Protocol supports restricting the operations a requester (identity) can perform by way of Access Control Lists (ACLs). They are structured as follows:
 
 ```protobuf
-	message ACL {
-	    // The same identity specified in the header of messages
-		optional int64 identity = 1;
-
-		// This is the identity's HMAC Key. This is a shared secret between the
-		// client and the device, used to sign requests.
-		optional bytes key = 2;
-
-		// This is the algorithm used for performing the HMAC for messages for 
-		// this identity.
-		// The supported values are: HmacSHA1.
-	    optional HMACAlgorithm hmacAlgorithm = 3;
+message ACL {
+    	// The same identity specified in the header of messages
+	optional int64 identity = 1;
 	
-		// Scope is the core of an ACL, an identity can have several.
-		// See below.
-		repeated Scope scope = 4;
+	// This is the identity's HMAC Key. This is a shared secret between the
+	// client and the device, used to sign requests.
+	optional bytes key = 2;
+	
+	// This is the algorithm used for performing the HMAC for messages for 
+	// this identity.
+	// The supported values are: HmacSHA1.
+    	optional HMACAlgorithm hmacAlgorithm = 3;
 
-		// Scopes grant a set of permissions to the identity associated
-		// with the ACL. Scopess can further restrict which situations
-		// those permissions apply to by using the offset, value,
-		// and TlsRequired fields
-		message Scope {
-			// Offset and value are optional and should be used to restrict 
-			// which keys the Scope applies to. If offset and value are
-			// specified, the permission will only apply to keys that match
-			// the value at the given offset. This is analogous to a substring
-			// match in many languages, where the key in question is the target.
-			optional int64 offset = 1;
-			optional bytes value = 2;
-			
-			// The Permission being granted.
-			// There can be many, there must be at least one.
-			repeated Permission permission = 3;
-			
-			// Optional boolean, defaults to false.
-			// When set to true, this scope only applies to SSL connections.
-			// Even if an identity has an ACL with a scope containing a specific
-			// permission, if that permission belongs to a scope for which
-			// TlsRequired is true and the identity makes a non-ssl request,
-			// Kinetic will behave as if the identity does not have that
-			// permission.
-			optional bool TlsRequired = 4; 
-		}
+	// Scope is the core of an ACL, an identity can have several.
+	// See below.
+	repeated Scope scope = 4;
 
-		// These are the permissions that can be included in a scope
-		enum Permission {
-			INVALID = -1; // place holder for backward compatibility
-			READ = 0; // can read key/values
-			WRITE = 1; // can write key/values
-			DELETE = 2; // can delete key/values
-			RANGE = 3; // can do a range
-			SETUP = 4; // can set up a device
-			P2POP = 5; // can do a peer to peer operation
-			GETLOG = 7; // can get log
-			SECURITY = 8; // can set up the security permission of the device
-		}
-
-		// Currently only one valid HMAC algorithm is supported
-		enum HMACAlgorithm {
-           // Added to allow additional HmacAlgorithms without breaking 
-           // backward compatibility.
-           Unknown = 0; 
-           // this is the default
-           HmacSHA1 = 1; 
-        }
-
+	// Scopes grant a set of permissions to the identity associated
+	// with the ACL. Scopess can further restrict which situations
+	// those permissions apply to by using the offset, value,
+	// and TlsRequired fields
+	message Scope {
+		// Offset and value are optional and should be used to restrict 
+		// which keys the Scope applies to. If offset and value are
+		// specified, the permission will only apply to keys that match
+		// the value at the given offset. This is analogous to a substring
+		// match in many languages, where the key in question is the target.
+		optional int64 offset = 1;
+		optional bytes value = 2;
+		
+		// The Permission being granted.
+		// There can be many, there must be at least one.
+		repeated Permission permission = 3;
+		
+		// Optional boolean, defaults to false.
+		// When set to true, this scope only applies to SSL connections.
+		// Even if an identity has an ACL with a scope containing a specific
+		// permission, if that permission belongs to a scope for which
+		// TlsRequired is true and the identity makes a non-ssl request,
+		// Kinetic will behave as if the identity does not have that
+		// permission.
+		optional bool TlsRequired = 4; 
 	}
+
+	// These are the permissions that can be included in a scope
+	enum Permission {
+		INVALID = -1; // place holder for backward compatibility
+		READ = 0; // can read key/values
+		WRITE = 1; // can write key/values
+		DELETE = 2; // can delete key/values
+		RANGE = 3; // can do a range
+		SETUP = 4; // can set up a device
+		P2POP = 5; // can do a peer to peer operation
+		GETLOG = 7; // can get log
+		SECURITY = 8; // can set up the security permission of the device
+	}
+
+	// Currently only one valid HMAC algorithm is supported
+	enum HMACAlgorithm {
+		// Added to allow additional HmacAlgorithms without breaking 
+		// backward compatibility.
+		Unknown = 0; 
+		// this is the default
+		HmacSHA1 = 1; 
+	}
+}
 
 ```
 
@@ -116,7 +115,7 @@ In this section we'll give some concrete examples of how ACLs can be used.
 
 Suppose client 1 has an ACL like so:
 
-```
+```js
 ACL {
 	identity: 1
 	key: "a3b38c37298f7f01a377518dae81dd99655b2be8129c3b2c6357b7e779064159"
@@ -142,7 +141,7 @@ Client 1 would be able to `GET` any object in the store, but only `PUT` keys tha
 
 Suppose client 2 has an ACL like so:
 
-```
+```js
 ACL {
 	identity: 2
 	key: "13010b8d8acdbe6abc005840aad1dc5dedb4345e681ed4e3c4645d891241d6b2"
@@ -171,7 +170,7 @@ There are many fields in the `protobuf` message which can be specified on many o
 
 **Request Message**
 
-```
+```js
 command {
   header {
   	// Optional int64, default value is 0
@@ -226,7 +225,7 @@ hmac: "..."
 
 **Response Message**
 
-```
+```js
 command {
   header {
   	// Required int64.
@@ -296,7 +295,7 @@ The `NOOP` operation can be used as a quick test of whether the Kinetic Device i
 
 **Request Message**
 
-```
+```js
 command {
   header {
     // See above for descriptions of these fields
@@ -313,7 +312,7 @@ hmac: "..."
 
 **Response Message**
 
-```
+```js
 
 command {
   header {
@@ -337,7 +336,7 @@ hmac: ""
 
 Within the `body` message of a value modification operation, many fields in the `keyValue` apply to all operations.
 
-```
+```js
 command: {
 ...
 	body: {
@@ -401,7 +400,7 @@ The `PUT` operation sets the value and metadata for a given key. If a value alre
 
 The following request will add a key value pair to the store. Note that `dbVersion` is not specified, this is allowed when adding (as opposed to updating) a value.
 
-```
+```js
 command {
   // See top level cross cutting concerns for header details
   header {
@@ -430,7 +429,7 @@ hmac: "..."
 **Response Message**
 When the key is successfully written, the device will respond with the following message:
 
-```
+```js
 command {
   header {
   	// See above
@@ -468,7 +467,7 @@ The `DELETE` operation removes the entry for a given key. It respects the same l
 
 The following request will remove a key value pair to the store.
 
-```
+```js
 command {
   // See top level cross cutting concerns for header details
   header {
@@ -494,8 +493,7 @@ hmac: "..."
 **Response Message**
 When the entry is successfully removed, the device will respond with the following message:
 
-```
-
+```js
 command {
   // See top level cross cutting concerns for header details
   header {
@@ -533,7 +531,7 @@ this connection are guaranteed to be persisted. Data on separate connections is 
 
 The following request will flush the write cache.
 
-```
+```js
 command {
   // See top level cross cutting concerns for header details
   header {
@@ -554,8 +552,7 @@ hmac: "..."
 **Response Message**
 When the cache is flushed, the device will return the following message:
 
-```
-
+```js
 command {
   // See top level cross cutting concerns for header details
   header {
@@ -587,7 +584,7 @@ There are a number of operations which are designed to allow clients to read val
 Within the `body` message of a read value operation, many fields in the `keyValue` message apply to all operations.
 
 
-```
+```js
 keyValue {
       // Required bytes.
       // The key identifying the value in the data store.
@@ -606,7 +603,7 @@ The `GET` operation is used to retrieve the value and metadata for a given key.
 
 **Request Message**
 
-```
+```js
 command {
   header {
   	// See above for descriptions of these fields
@@ -633,7 +630,7 @@ hmac: "..."
 
 A successful response will return the value in the top level Kinetic PDU, and will have a `SUCCESS` status:
 
- ```   
+```js   
 command {
   header {
   	// See above
@@ -668,7 +665,7 @@ The `GETVERSION` operation provdes the current store version for a given key.
 
 **Request Message**
 
-```
+```js
 command {
   header {
     // These fields are documented above
@@ -691,7 +688,7 @@ hmac: "..."
 
 **Response Message**
 
-```
+```js
 command {
   header {
   	// This field is documented above
@@ -724,7 +721,7 @@ The `GETNEXT` operation takes a key and returns the value for the next key in th
 
 **Request Message**
 
-```
+```js
 command {
   header {
     // See above for descriptions of these fields
@@ -750,7 +747,7 @@ hmac: "..."
 
 **Response Message**
 
-```
+```js
 command {
   header {
     // See above for descriptions of this field
@@ -797,7 +794,7 @@ The `GETPREVIOUS` operation takes a key and returns the value for the previous k
 
 **Request Message**
 
-```
+```js
 command {
   header {
     // See above for descriptions of these fields
@@ -824,7 +821,7 @@ hmac: "..."
 
 **Response Message**
 
-```
+```js
 command {
   header {
     // See above for descriptions of this field
@@ -876,7 +873,7 @@ Note that this operation does not fetch associated values, or other metadata. It
 
 **Request Message**
 
-```
+```js
 command {
   header {
     // See above for descriptions of these fields
@@ -926,7 +923,7 @@ command {
 **Response Message**
 
 
-```
+```js
 command {
   header {
     ackSequence: ...
@@ -974,7 +971,7 @@ The `SETUP` operation can be used to set the device's `clusterVersion` and `pin`
 
 **Request Message**
 
-``` 
+```js 
 command {
   header {
     // Important: this should be the current cluster version. This operation is
@@ -1004,7 +1001,7 @@ hmac: ""
 
 **Response Message**
 
-```
+```js
 command {
   header {
     ackSequence: ...
@@ -1025,7 +1022,7 @@ This operation should be used to erase all stored data from the device. **This o
 
 **Request Message**
 
-```
+```js
 command {
   header {
   	// See top level cross cutting concerns for header details
@@ -1049,7 +1046,7 @@ hmac: ""
 
 **Response Message**
 
-```
+```js
 command {
   header {
     ackSequence: ...
@@ -1069,7 +1066,7 @@ This operation should be used load new firmware on the device.
 
 **Request Message**
 
-```
+```js
 command {
   header {
   	// See top level cross cutting concerns for header details
@@ -1096,7 +1093,7 @@ The value field in the Kinetic PDU (describe above) will contain the firmware pa
 
 **Response Message**
 
-```
+```js
 command {
   header {
     ackSequence: ...
@@ -1125,7 +1122,7 @@ To set the ACL for a identity (or many identities), a request like the following
 
 **Request Message**
 
-```
+```js
 command {
   header {
   	// See top level cross cutting concerns for header details
@@ -1216,7 +1213,7 @@ hmac: "..."
 
 **Response Message**
 
-```
+```js
 command {
   header {
     ackSequence: ...
@@ -1259,7 +1256,7 @@ Below we will show the message structure used to request all types in a single `
 
 **Request Message**
 
-```
+```js
 command {
   header {
     clusterVersion: ...
@@ -1288,7 +1285,7 @@ hmac: "..."
 
 **Respose Message**
 
-```
+```js
 command {
   header {
     ackSequence: ...
@@ -1430,7 +1427,7 @@ The `PEER2PEERPUSH` operation allows a client to instruct a Kinetic Device to co
 
 **Request Message**
 
-```
+```js
 command {
   header {
     clusterVersion: ...
@@ -1493,7 +1490,7 @@ hmac: ""
 
 **Response Message**
 
-```
+```js
 command {
   header {
     ackSequence: ...
