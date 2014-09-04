@@ -501,9 +501,9 @@ message Command {
 
 			message Interface {
 				optional string name = 1;
-				optional bytes MAC = 2;
-				optional bytes ipv4Address = 3;
-				optional bytes ipv6Address = 4;
+				optional string MAC = 2;
+				optional string ipv4Address = 3;
+				optional string ipv6Address = 4;
 			}
 
 		}
@@ -633,7 +633,7 @@ message Command {
 	// Pin Operations are used for special commands that are valid when the device
 	// is locked or to be locked. These are unlock, lock and erase.
 	// This must come over the TLS connection to protect the confidentiality and
-	// integrity. This operations must be used with PinAuth.    
+	// integrity. This operations must be used with PinAuth.
 	message PinOperation {
 		optional PinOpType pinOpType = 1;
 
