@@ -36,7 +36,7 @@ The message structure for each operation will be described in depth in the follo
 # Access Control
 The Kinetic Protocol supports restricting the operations a requester (identity) can perform by way of Access Control Lists (ACLs). They are structured as follows:
 
-```
+```protobuf
 	message ACL {
 	    // The same identity specified in the header of messages
 		optional int64 identity = 1;
